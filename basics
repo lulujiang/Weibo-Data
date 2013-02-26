@@ -1,0 +1,48 @@
+require(Rweibo)
+## registerApp(app_name = "mytest", "********", "*******************")
+## roauth <- createOAuth("mytest", "rweibo", forcelogin = TRUE)
+
+roauth <- createOAuth(app_name = "mytest", access_name = "rweibo")
+
+## 获取数据
+stalk <- statuses.user_timeline(roauth, screen_name = "username", count = 100)
+## stalk[[1]][["created_at"]]
+
+
+###### WEEKDAY FREQUENCY
+getTime=function(i, listname)  {listname[[i]][["created_at"]]}
+timestamp = unlist(lapply(1:length(stalk), getTime, stalk))
+weekdaylist = function(i,listname) {substr(timestamp[i],1,3)}
+weekday = unlist(lapply(1:length(stalk), weekdaylist, stalk))
+## table(weekday)
+barplot(table(weekday),names.arg=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
+
+
+getMonth = function(i,listname) {unlist(strsplit(timestamp[i]," "))[2]}
+monthlist = unlist(lapply(1:length(stalk), getMonth, stalk))
+getDate = function(i,listname) {unlist(strsplit(timestamp[i]," "))[3]}
+datelist = unlist(lapply(1:length(stalk), getDate, stalk))
+
+###### Response vs. Time
+daytimelist = function(i,listname) {unlist(strsplit(timestamp[i]," "))[4]}
+daytime = unlist(lapply(1:length(stalk), daytimelist, stalk))
+getYear = function(i,listname) {unlist(strsplit(timestamp[i]," "))[6]}
+years = unlist(lapply(1:length(stalk), getYear, stalk))
+getCommentCount = function(i, listname)  {listname[[i]][["comments_count"]]}
+CommentCount = unlist(lapply(1:length(stalk), getCommentCount, stalk))
+datareptime = data.frame(year = years,
+                         month=monthlist,
+                         date = datelist,
+                         weekday=weekday,
+                         time=daytime,
+                         comment=CommentCount,
+                         stringsAsFactors=F)
+datareptime2 = subset(datareptime, comment<40000)
+with(datareptime2, {
+  times <- strptime(paste(year, month, date, time),"%Y %b %d %X")
+  plot(times, comment, type = "l") # axis at 4-hour intervals
+  # now label every hour on the time axis
+  plot(times, comment, type = "l", xaxt = "n")
+  r <- as.POSIXct(round(range(times), "hours"))
+  axis.POSIXct(1, at = seq(r[1], r[2], by = "hour"), format = "%H")
+  })
