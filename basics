@@ -39,7 +39,7 @@ datareptime = data.frame(year = years,
                          time=daytime,
                          Comment=CommentCount,
                          stringsAsFactors=F)
-datareptime2 = subset(datareptime, Comment<20000)
+## datareptime2 = subset(datareptime, Comment<20000)
 with(datareptime2, {
   Time <- strptime(paste(year, month, date, time),"%Y %b %d %X")
   plot(Time, Comment, type = "l") # axis at 4-hour intervals
