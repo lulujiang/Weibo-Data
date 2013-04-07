@@ -23,6 +23,22 @@ monthlist = unlist(lapply(1:length(stalk), getMonth, stalk))
 getDate = function(i,listname) {unlist(strsplit(timestamp[i]," "))[3]}
 datelist = unlist(lapply(1:length(stalk), getDate, stalk))
 
+###################################################################################
+###### WEEKDAY FREQUENCY
+getTime=function(i, listname)  {listname[[i]][["created_at"]]}
+timestamp = unlist(lapply(1:length(stalk), getTime, stalk))
+weekdaylist = function(i,listname) {substr(timestamp[i],1,3)}
+weekday = unlist(lapply(1:length(stalk), weekdaylist, stalk))
+## table(weekday)
+barplot(table(weekday),names.arg=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
+
+
+getMonth = function(i,listname) {unlist(strsplit(timestamp[i]," "))[2]}
+monthlist = unlist(lapply(1:length(stalk), getMonth, stalk))
+getDate = function(i,listname) {unlist(strsplit(timestamp[i]," "))[3]}
+datelist = unlist(lapply(1:length(stalk), getDate, stalk))
+
+###################################################################################
 ###### Response vs. Time
 daytimelist = function(i,listname) {unlist(strsplit(timestamp[i]," "))[4]}
 daytime = unlist(lapply(1:length(stalk), daytimelist, stalk))
@@ -35,14 +51,46 @@ datareptime = data.frame(year = years,
                          date = datelist,
                          weekday=weekday,
                          time=daytime,
-                         comment=CommentCount,
+                         Comment=CommentCount,
                          stringsAsFactors=F)
-datareptime2 = subset(datareptime, comment<40000)
+datareptime2 = subset(datareptime, Comment<20000)
 with(datareptime2, {
-  times <- strptime(paste(year, month, date, time),"%Y %b %d %X")
-  plot(times, comment, type = "l") # axis at 4-hour intervals
+  Time <- strptime(paste(year, month, date, time),"%Y %b %d %X")
+  plot(Time, Comment, type = "l") # axis at 4-hour intervals
   # now label every hour on the time axis
-  plot(times, comment, type = "l", xaxt = "n")
-  r <- as.POSIXct(round(range(times), "hours"))
+  plot(Time, Comment, type = "l", xaxt = "n")
+  r <- as.POSIXct(round(range(Time), "hours"))
   axis.POSIXct(1, at = seq(r[1], r[2], by = "hour"), format = "%H")
   })
+
+
+###################################################################################
+###### text analysis of a single user
+require(Rwordseg)
+getText = function(i,listname) {unlist(stalk[i]," ")[["text"]]}
+textlist = unlist(lapply(1:length(stalk), getText, stalk))
+words<-unlist(lapply(X=textlist,FUN=segmentCN))
+word=lapply(X=words,FUN=strsplit," ")
+v=table(unlist(word))
+v=sort(v,decreasing=T)[1:500]
+d = data.frame(word = names(v), freq = v)
+d <- subset(d, word != c("的","是","了","http"))
+
+
+
+
+###################################################################################
+###### Search popular events
+material<-web.search.content("H7N9",page=10,sleepmean=10,sleepsd=1)
+
+require(Rwordseg)
+insertWords("H7N9")
+n<-length(material[,1])
+material<-material[material!=" "]
+words<-unlist(lapply(X=material,FUN=segmentCN))
+word=lapply(X=words,FUN=strsplit," ")
+v=table(unlist(word))
+v=sort(v,decreasing=T)
+v=sort(v,decreasing=T)[1:500]
+d = data.frame(word = names(v), freq = v)
+d <- subset(d, word != c("的","是","了","http"))
