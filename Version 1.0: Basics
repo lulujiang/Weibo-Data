@@ -4,7 +4,7 @@ require(Rweibo)
 
 roauth <- createOAuth(app_name = "mytest", access_name = "rweibo")
 
-## 获取数据
+## 获取某用户数据
 stalk <- statuses.user_timeline(roauth, screen_name = "username", count = 100)
 ## stalk[[1]][["created_at"]]
 
