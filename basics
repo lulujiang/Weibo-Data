@@ -9,20 +9,6 @@ stalk <- statuses.user_timeline(roauth, screen_name = "username", count = 100)
 ## stalk[[1]][["created_at"]]
 
 
-###### WEEKDAY FREQUENCY
-getTime=function(i, listname)  {listname[[i]][["created_at"]]}
-timestamp = unlist(lapply(1:length(stalk), getTime, stalk))
-weekdaylist = function(i,listname) {substr(timestamp[i],1,3)}
-weekday = unlist(lapply(1:length(stalk), weekdaylist, stalk))
-## table(weekday)
-barplot(table(weekday),names.arg=c("Mon","Tue","Wed","Thu","Fri","Sat","Sun"))
-
-
-getMonth = function(i,listname) {unlist(strsplit(timestamp[i]," "))[2]}
-monthlist = unlist(lapply(1:length(stalk), getMonth, stalk))
-getDate = function(i,listname) {unlist(strsplit(timestamp[i]," "))[3]}
-datelist = unlist(lapply(1:length(stalk), getDate, stalk))
-
 ###################################################################################
 ###### WEEKDAY FREQUENCY
 getTime=function(i, listname)  {listname[[i]][["created_at"]]}
